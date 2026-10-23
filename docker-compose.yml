@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  # 1. PostgreSQL Relational Database (Host port changed to 5435)
+  postgres:
+    image: postgres:16-alpine
+    container_name: hosting_event_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: eventhosting_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d eventhosting_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 2. Spring Boot 3 Backend (Host port changed to 8085)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: hosting_event_backend
+    restart: always
+    ports:
+      - "8085:8080"
+    environment:
+      SERVER_PORT: 8080
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/eventhosting_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgrespassword
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      MAIL_PROVIDER: ${MAIL_PROVIDER:-smtp}
+      MAIL_USERNAME: ${MAIL_USERNAME:-shaileshgajengi@gmail.com}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      RESEND_API_KEY: ${RESEND_API_KEY:-}
+      RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL:-EventSpot <onboarding@resend.dev>}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # 3. React Frontend (Host port changed to 5180)
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: hosting_event_frontend
+    restart: always
+    ports:
+      - "5180:5173"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

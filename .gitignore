@@ -1,0 +1,26 @@
+# Secrets & Local Environment
+.env
+.env.local
+*.env
+
+# Build outputs
+target/
+dist/
+build/
+*.class
+*.jar
+*.war
+
+# Node dependencies
+node_modules/
+npm-debug.log*
+
+# Database & Docker volumes
+postgres_data/
+
+# IDE & OS files
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
