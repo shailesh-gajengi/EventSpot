@@ -35,7 +35,10 @@ services:
       SPRING_DATASOURCE_USERNAME: postgres
       SPRING_DATASOURCE_PASSWORD: postgrespassword
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
-      MAIL_PROVIDER: ${MAIL_PROVIDER:-smtp}
+      MAIL_PROVIDER: ${MAIL_PROVIDER:-brevo}
+      BREVO_API_KEY: ${BREVO_API_KEY:-}
+      BREVO_SENDER_EMAIL: ${BREVO_SENDER_EMAIL:-shaileshgajengi@gmail.com}
+      BREVO_SENDER_NAME: ${BREVO_SENDER_NAME:-EventSpot}
       MAIL_USERNAME: ${MAIL_USERNAME:-shaileshgajengi@gmail.com}
       MAIL_PASSWORD: ${MAIL_PASSWORD:-}
       RESEND_API_KEY: ${RESEND_API_KEY:-}
