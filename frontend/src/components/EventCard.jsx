@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import StatusBadge from './StatusBadge';
 import { MapPin, User, Tag, CalendarClock, AlertCircle } from 'lucide-react';
 
@@ -79,4 +79,4 @@ const EventCard = ({ event, showStatus = false, onAction = null, actionLabel = '
   );
 };
 
-export default EventCard;
+export default memo(EventCard);

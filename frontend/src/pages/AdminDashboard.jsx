@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { apiService } from '../services/api';
@@ -18,15 +18,7 @@ const AdminDashboard = () => {
   const [successMsg, setSuccessMsg] = useState('');
   const [selectedEvent, setSelectedEvent] = useState(null);
 
-  useEffect(() => {
-    if (!user || !isAdmin) {
-      navigate('/login');
-      return;
-    }
-    loadData();
-  }, [user, isAdmin, filter]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
@@ -41,7 +33,15 @@ const AdminDashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filter]);
+
+  useEffect(() => {
+    if (!user || !isAdmin) {
+      navigate('/login');
+      return;
+    }
+    loadData();
+  }, [user, isAdmin, loadData, navigate]);
 
   const handleApprove = async (eventId) => {
     const res = await apiService.processApproval(eventId, 'Approved');

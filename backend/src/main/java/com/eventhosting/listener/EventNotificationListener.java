@@ -6,6 +6,7 @@ import com.eventhosting.event.EventSubmittedNotificationEvent;
 import com.eventhosting.service.email.EmailService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
@@ -23,11 +24,13 @@ public class EventNotificationListener {
 
     /**
      * Triggered strictly after the event creation transaction has successfully committed.
+     * Executed asynchronously so HTTP response is returned immediately to the artist.
      */
+    @Async("notificationExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
     public void onEventSubmitted(EventSubmittedNotificationEvent event) {
         try {
-            logger.info("Transaction committed for event submission '{}'. Sending confirmation email to [{}]...",
+            logger.info("Transaction committed for event submission '{}'. Sending confirmation email to [{}] asynchronously...",
                     event.eventName(), event.toEmail());
             emailService.sendEventSubmissionEmail(event.toEmail(), event.artistName(), event.eventName());
         } catch (Exception ex) {
@@ -38,7 +41,9 @@ public class EventNotificationListener {
 
     /**
      * Triggered strictly after the event approval/rejection status change has successfully committed.
+     * Executed asynchronously so HTTP response is returned immediately to the admin.
      */
+    @Async("notificationExecutor")
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
     public void onEventStatusChanged(EventStatusChangedNotificationEvent event) {
         try {
@@ -49,7 +54,7 @@ public class EventNotificationListener {
                 return;
             }
 
-            logger.info("Transaction committed for status update on event '{}' ({} -> {}). Sending notification to [{}]...",
+            logger.info("Transaction committed for status update on event '{}' ({} -> {}). Sending notification to [{}] asynchronously...",
                     event.eventName(), event.oldStatus(), event.newStatus(), event.toEmail());
 
             if (event.newStatus() == ApprovalStatus.APPROVED) {

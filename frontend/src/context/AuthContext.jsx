@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useMemo, useCallback } from 'react';
 
 const AuthContext = createContext(null);
 
@@ -12,33 +12,30 @@ export const AuthProvider = ({ children }) => {
     }
   });
 
-  const loginUser = (userData) => {
+  const loginUser = useCallback((userData) => {
     setCurrentUser(userData);
     localStorage.setItem('hosting_event_user', JSON.stringify(userData));
-  };
+  }, []);
 
-  const logoutUser = () => {
+  const logoutUser = useCallback(() => {
     setCurrentUser(null);
     localStorage.removeItem('hosting_event_user');
-  };
+  }, []);
 
-  const isArtist = currentUser?.role === 'ARTIST';
-  const isAdmin = currentUser?.role === 'ADMIN';
+  const value = useMemo(() => {
+    const isArtist = currentUser?.role === 'ARTIST';
+    const isAdmin = currentUser?.role === 'ADMIN';
+    return {
+      user: currentUser,
+      login: loginUser,
+      logout: logoutUser,
+      isArtist,
+      isAdmin,
+      isAuthenticated: Boolean(currentUser),
+    };
+  }, [currentUser, loginUser, logoutUser]);
 
-  return (
-    <AuthContext.Provider
-      value={{
-        user: currentUser,
-        login: loginUser,
-        logout: logoutUser,
-        isArtist,
-        isAdmin,
-        isAuthenticated: !!currentUser,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => useContext(AuthContext);

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Clock, CheckCircle2, XCircle } from 'lucide-react';
 
 const StatusBadge = ({ status }) => {
@@ -30,4 +30,4 @@ const StatusBadge = ({ status }) => {
   );
 };
 
-export default StatusBadge;
+export default memo(StatusBadge);

@@ -276,6 +276,8 @@ button {
   display: flex;
   flex-direction: column;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 280px;
 }
 
 .event-card:hover {

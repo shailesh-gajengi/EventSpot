@@ -5,7 +5,14 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "hosting_event")
+@Table(
+    name = "hosting_event",
+    indexes = {
+        @Index(name = "idx_event_organizer_id", columnList = "organizer_id"),
+        @Index(name = "idx_event_approval_status", columnList = "approval_status"),
+        @Index(name = "idx_event_submission_date", columnList = "submission_date")
+    }
+)
 public class HostingEvent {
 
     @Id

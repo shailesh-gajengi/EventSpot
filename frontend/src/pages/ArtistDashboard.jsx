@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { apiService } from '../services/api';
@@ -13,15 +13,8 @@ const ArtistDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    if (!user || !isArtist) {
-      navigate('/login');
-      return;
-    }
-    fetchMyEvents();
-  }, [user, isArtist]);
-
-  const fetchMyEvents = async () => {
+  const fetchMyEvents = useCallback(async () => {
+    if (!user?.userId) return;
     try {
       setLoading(true);
       setError('');
@@ -32,13 +25,34 @@ const ArtistDashboard = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.userId]);
 
-  // Metrics
-  const totalCount = events.length;
-  const pendingCount = events.filter((e) => e.approvalStatus?.toLowerCase() === 'pending').length;
-  const hostedCount = events.filter((e) => e.approvalStatus?.toLowerCase() === 'approved').length;
-  const rejectedCount = events.filter((e) => e.approvalStatus?.toLowerCase() === 'rejected').length;
+  useEffect(() => {
+    if (!user || !isArtist) {
+      navigate('/login');
+      return;
+    }
+    fetchMyEvents();
+  }, [user, isArtist, fetchMyEvents, navigate]);
+
+  // Single-pass O(N) metrics computation
+  const { totalCount, pendingCount, hostedCount, rejectedCount } = useMemo(() => {
+    let pending = 0;
+    let hosted = 0;
+    let rejected = 0;
+    for (let i = 0; i < events.length; i++) {
+      const status = (events[i].approvalStatus || '').toLowerCase();
+      if (status === 'pending') pending++;
+      else if (status === 'approved' || status === 'hosted') hosted++;
+      else if (status === 'rejected') rejected++;
+    }
+    return {
+      totalCount: events.length,
+      pendingCount: pending,
+      hostedCount: hosted,
+      rejectedCount: rejected,
+    };
+  }, [events]);
 
   return (
     <div>

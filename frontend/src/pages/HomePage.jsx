@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { apiService } from '../services/api';
 import EventCard from '../components/EventCard';
 import { Search, Sparkles, Filter } from 'lucide-react';
@@ -12,11 +12,7 @@ const HomePage = () => {
   const [search, setSearch] = useState('');
   const [selectedGenre, setSelectedGenre] = useState('ALL');
 
-  useEffect(() => {
-    fetchHostedEvents();
-  }, []);
-
-  const fetchHostedEvents = async () => {
+  const fetchHostedEvents = useCallback(async () => {
     try {
       setLoading(true);
       setError('');
@@ -27,17 +23,28 @@ const HomePage = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const filteredEvents = events.filter((evt) => {
-    const matchesSearch = evt.eventName.toLowerCase().includes(search.toLowerCase()) ||
-      (evt.attendeeName && evt.attendeeName.toLowerCase().includes(search.toLowerCase())) ||
-      (evt.venue && evt.venue.toLowerCase().includes(search.toLowerCase()));
+  useEffect(() => {
+    fetchHostedEvents();
+  }, [fetchHostedEvents]);
 
-    const matchesGenre = selectedGenre === 'ALL' || evt.eventGenre?.toLowerCase() === selectedGenre.toLowerCase();
+  const filteredEvents = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    const genreFilter = selectedGenre.toLowerCase();
 
-    return matchesSearch && matchesGenre;
-  });
+    return events.filter((evt) => {
+      const matchesSearch = !query ||
+        (evt.eventName && evt.eventName.toLowerCase().includes(query)) ||
+        (evt.attendeeName && evt.attendeeName.toLowerCase().includes(query)) ||
+        (evt.venue && evt.venue.toLowerCase().includes(query));
+
+      const matchesGenre = selectedGenre === 'ALL' ||
+        (evt.eventGenre && evt.eventGenre.toLowerCase() === genreFilter);
+
+      return matchesSearch && matchesGenre;
+    });
+  }, [events, search, selectedGenre]);
 
   return (
     <div>
