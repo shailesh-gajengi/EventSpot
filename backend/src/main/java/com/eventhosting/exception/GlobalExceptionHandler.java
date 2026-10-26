@@ -1,5 +1,6 @@
 package com.eventhosting.exception;
 
+import com.eventhosting.dto.response.ResponseBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -14,36 +15,43 @@ import java.util.List;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ErrorDetails> handleValidationExceptions(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ResponseBean<List<String>>> handleValidationExceptions(MethodArgumentNotValidException ex) {
         List<String> errors = new ArrayList<>();
         for (FieldError error : ex.getBindingResult().getFieldErrors()) {
             errors.add(error.getField() + ": " + error.getDefaultMessage());
         }
-        ErrorDetails errorDetails = new ErrorDetails("Validation Failed", errors);
-        return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
+        ResponseBean<List<String>> response = ResponseBean.error(
+                HttpStatus.BAD_REQUEST.value(),
+                "Validation Failed",
+                errors
+        );
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ResponseEntity<ErrorDetails> handleResourceNotFoundException(ResourceNotFoundException ex) {
-        List<String> details = new ArrayList<>();
-        details.add(ex.getMessage());
-        ErrorDetails errorDetails = new ErrorDetails("Resource Not Found", details);
-        return new ResponseEntity<>(errorDetails, HttpStatus.NOT_FOUND);
+    public ResponseEntity<ResponseBean<String>> handleResourceNotFoundException(ResourceNotFoundException ex) {
+        ResponseBean<String> response = ResponseBean.error(
+                HttpStatus.NOT_FOUND.value(),
+                ex.getMessage() != null ? ex.getMessage() : "Resource Not Found"
+        );
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(BadRequestException.class)
-    public ResponseEntity<ErrorDetails> handleBadRequestException(BadRequestException ex) {
-        List<String> details = new ArrayList<>();
-        details.add(ex.getMessage());
-        ErrorDetails errorDetails = new ErrorDetails("Bad Request", details);
-        return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
+    public ResponseEntity<ResponseBean<String>> handleBadRequestException(BadRequestException ex) {
+        ResponseBean<String> response = ResponseBean.error(
+                HttpStatus.BAD_REQUEST.value(),
+                ex.getMessage() != null ? ex.getMessage() : "Bad Request"
+        );
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorDetails> handleGlobalException(Exception ex) {
-        List<String> details = new ArrayList<>();
-        details.add(ex.getMessage());
-        ErrorDetails errorDetails = new ErrorDetails("An internal server error occurred", details);
-        return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<ResponseBean<String>> handleGlobalException(Exception ex) {
+        ResponseBean<String> response = ResponseBean.error(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                ex.getMessage() != null ? ex.getMessage() : "An internal server error occurred"
+        );
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

@@ -1,10 +1,10 @@
 package com.eventhosting.controller;
 
 import com.eventhosting.dto.request.ApprovalActionRequest;
-import com.eventhosting.dto.response.ApiResponse;
 import com.eventhosting.dto.response.ApprovalResponse;
 import com.eventhosting.dto.response.DashboardStatsResponse;
 import com.eventhosting.dto.response.EventResponse;
+import com.eventhosting.dto.response.ResponseBean;
 import com.eventhosting.service.ApprovalService;
 import com.eventhosting.service.HostingEventService;
 import jakarta.validation.Valid;
@@ -26,29 +26,29 @@ public class AdminController {
     }
 
     @GetMapping("/events")
-    public ResponseEntity<ApiResponse<List<EventResponse>>> getAllEvents(@RequestParam(required = false) String status) {
+    public ResponseEntity<ResponseBean<List<EventResponse>>> getAllEvents(@RequestParam(required = false) String status) {
         List<EventResponse> events = hostingEventService.getAllEvents(status);
-        return ResponseEntity.ok(ApiResponse.success("Events retrieved successfully", events));
+        return ResponseEntity.ok(ResponseBean.success("Events retrieved successfully", events));
     }
 
     @PutMapping("/events/{eventId}/approval")
-    public ResponseEntity<ApiResponse<ApprovalResponse>> processEventApproval(
+    public ResponseEntity<ResponseBean<ApprovalResponse>> processEventApproval(
             @PathVariable Long eventId,
             @Valid @RequestBody ApprovalActionRequest request) {
         ApprovalResponse response = approvalService.processApproval(eventId, request);
         String action = "Approved".equalsIgnoreCase(request.getStatus()) ? "approved and hosted" : "rejected";
-        return ResponseEntity.ok(ApiResponse.success("Event successfully " + action, response));
+        return ResponseEntity.ok(ResponseBean.success("Event successfully " + action, response));
     }
 
     @GetMapping("/stats")
-    public ResponseEntity<ApiResponse<DashboardStatsResponse>> getDashboardStats() {
+    public ResponseEntity<ResponseBean<DashboardStatsResponse>> getDashboardStats() {
         DashboardStatsResponse stats = approvalService.getDashboardStats();
-        return ResponseEntity.ok(ApiResponse.success("Dashboard metrics retrieved", stats));
+        return ResponseEntity.ok(ResponseBean.success("Dashboard metrics retrieved", stats));
     }
 
     @GetMapping("/events/{eventId}/approval")
-    public ResponseEntity<ApiResponse<ApprovalResponse>> getApprovalRecord(@PathVariable Long eventId) {
+    public ResponseEntity<ResponseBean<ApprovalResponse>> getApprovalRecord(@PathVariable Long eventId) {
         ApprovalResponse response = approvalService.getApprovalByEventId(eventId);
-        return ResponseEntity.ok(ApiResponse.success("Approval record retrieved", response));
+        return ResponseEntity.ok(ResponseBean.success("Approval record retrieved", response));
     }
 }

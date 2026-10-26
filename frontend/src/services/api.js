@@ -9,6 +9,43 @@ const apiClient = axios.create({
   },
 });
 
+// Interceptor to support ResponseBean ({ errorCode, errorMsg, body }) seamlessly alongside frontend expectation
+apiClient.interceptors.response.use(
+  (response) => {
+    if (response.data && typeof response.data === 'object') {
+      const d = response.data;
+      if (d.body !== undefined && d.data === undefined) {
+        d.data = d.body;
+      }
+      if (d.errorCode !== undefined && d.success === undefined) {
+        d.success = d.errorCode === 0;
+      }
+      if (d.errorMsg !== undefined && d.message === undefined) {
+        d.message = d.errorMsg;
+      }
+    }
+    return response;
+  },
+  (error) => {
+    if (error.response && error.response.data && typeof error.response.data === 'object') {
+      const d = error.response.data;
+      if (d.body !== undefined && d.data === undefined) {
+        d.data = d.body;
+      }
+      if (d.errorCode !== undefined && d.success === undefined) {
+        d.success = d.errorCode === 0;
+      }
+      if (d.errorMsg !== undefined && d.message === undefined) {
+        d.message = d.errorMsg;
+      }
+      if (Array.isArray(d.body) && d.details === undefined) {
+        d.details = d.body;
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 export const apiService = {
   // Authentication
   register: async (organizerData) => {

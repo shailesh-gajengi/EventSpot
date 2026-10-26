@@ -1,8 +1,8 @@
 package com.eventhosting.controller;
 
-import com.eventhosting.dto.response.ApiResponse;
 import com.eventhosting.dto.response.EventResponse;
 import com.eventhosting.dto.response.OrganizerResponse;
+import com.eventhosting.dto.response.ResponseBean;
 import com.eventhosting.service.HostingEventService;
 import com.eventhosting.service.OrganizerService;
 import org.springframework.http.ResponseEntity;
@@ -23,14 +23,14 @@ public class OrganizerController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<OrganizerResponse>> getOrganizerProfile(@PathVariable Long id) {
+    public ResponseEntity<ResponseBean<OrganizerResponse>> getOrganizerProfile(@PathVariable Long id) {
         OrganizerResponse response = organizerService.getOrganizerById(id);
-        return ResponseEntity.ok(ApiResponse.success("Organizer profile retrieved", response));
+        return ResponseEntity.ok(ResponseBean.success("Organizer profile retrieved", response));
     }
 
     @GetMapping("/{id}/events")
-    public ResponseEntity<ApiResponse<List<EventResponse>>> getEventsByOrganizer(@PathVariable Long id) {
+    public ResponseEntity<ResponseBean<List<EventResponse>>> getEventsByOrganizer(@PathVariable Long id) {
         List<EventResponse> events = hostingEventService.getEventsByOrganizer(id);
-        return ResponseEntity.ok(ApiResponse.success("Artist events retrieved", events));
+        return ResponseEntity.ok(ResponseBean.success("Artist events retrieved", events));
     }
 }
